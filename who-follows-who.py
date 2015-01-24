@@ -10,12 +10,12 @@ twitter_access_token_secret = ''
 
 twitter = UserClient(twitter_consumer_key, twitter_consumer_secret, twitter_access_token, twitter_access_token_secret)
 
-with open('accounts.csv', 'r') as input:
+with open('accounts.csv', 'rU') as input:
     accounts = set(map(lambda each: each['Account'], csv.DictReader(input)))
-with open('accounts.csv', 'r') as input:
+with open('accounts.csv', 'rU') as input:
     rows = csv.DictReader(input)
     with open('results.csv', 'w') as output:
-        writer = csv.DictWriter(output, ['Account', 'Tweets', 'Followers', 'AccountsFollowing'])
+        writer = csv.DictWriter(output, ['Account', 'Tweets', 'Followers', 'AccountsFollowingNumber', 'AccountsFollowing'])
         for row in rows:
             if row['Account'] == '': continue
             detail_response = twitter.api.users.show.get(screen_name=row['Account'])
@@ -34,6 +34,7 @@ with open('accounts.csv', 'r') as input:
                 'Account': row['Account'],
                 'Tweets': tweets,
                 'Followers': followers,
+                'AccountsFollowingNumber': len(following_accounts)
                 'AccountsFollowing': ', '.join(following_accounts)
             }
             writer.writerow(data)
