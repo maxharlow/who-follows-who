@@ -43,3 +43,21 @@ $ node who-follows-who
 This may take some time, depending on how many accounts are listed, and how many people each of those accounts follow -- the Twitter API limits us to requesting the names 200 people being followed by a user every minute.
 
 Once finished, the results can be found in `results.csv`.
+
+
+Importing into Neo4j
+--------------------
+
+A script such as this would import the results produced above into the [Neo4j] (http://neo4j.com/) graph database.
+Note that the full path to `results.csv` needs to be filled in before running.
+
+```neo4j
+CREATE CONSTRAINT ON (user: User) ASSERT user.name IS UNIQUE;
+
+USING PERIODIC COMMIT
+LOAD CSV WITH HEADERS FROM 'file://.../results.csv' AS record
+  MERGE (a:User {name: record.account})
+  MERGE (b:User {name: record.following})
+  CREATE (a)-[:FOLLOWS]->(b)
+;
+```
