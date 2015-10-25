@@ -57,7 +57,7 @@ CREATE CONSTRAINT ON (user: User) ASSERT user.name IS UNIQUE;
 USING PERIODIC COMMIT
 LOAD CSV WITH HEADERS FROM 'file://.../results.csv' AS record
   MERGE (a:User {name: record.account})
-  MERGE (b:User {name: record.following})
+  MERGE (b:User {name: record.follows})
   CREATE (a)-[:FOLLOWS]->(b)
 ;
 ```

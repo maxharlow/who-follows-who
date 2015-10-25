@@ -51,7 +51,7 @@ var doTwitterFollowingListing = createTwitterFollowingListing(function (qs, resp
     return response.users.map(function (accountFollowed) {
         return {
             account: qs.screen_name,
-            follows: accountFollowed.screen_name
+            follows: accountFollowed.screen_name.toLowerCase()
         }
     })
 })
