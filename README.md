@@ -1,7 +1,7 @@
 Who Follows Who?
 ================
 
-Get who is following who from a list of Twitter account names as a spreadsheet.
+Find who is following who else from a list of Twitter account names.
 
 Part of a set of Twitter tools, also including [Who Says What?] (https://github.com/maxharlow/who-says-what/) and [Who Said That?] (https://github.com/maxharlow/who-said-that).
 
