@@ -2,10 +2,10 @@
     "name": "who-follows-who",
     "private": true,
     "dependencies": {
-	"highland": "2.5.x",
-	"request": "2.58.x",
-	"neat-csv": "1.0.x",
-	"csv-write-stream": "1.0.x"
+        "highland": "2.6.x",
+        "request": "2.67.x",
+        "neat-csv": "1.1.x",
+        "csv-write-stream": "1.0.x"
     },
     "scripts": {
         "start": "node who-follows-who"
