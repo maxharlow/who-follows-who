@@ -1,9 +1,9 @@
-var highland = require('highland')
-var request = require('request')
-var csvParser = require('neat-csv')
-var csvWriter = require('csv-write-stream')
-var fs = require('fs')
-var config = require('./config')
+const Highland = require('highland')
+const Request = require('request')
+const CSVParser = require('neat-csv')
+const CSVWriter = require('csv-write-stream')
+const FS = require('fs')
+const Config = require('./config')
 
 function queryTwitterFriends(account) {
     return {
@@ -14,41 +14,37 @@ function queryTwitterFriends(account) {
 
 function createTwitterFollowingListing(parser) {
     return function query(qs, callback) {
-        var sleep = 60 * 1000 // 60 seconds
-        var params = {
+        const sleep = 60 * 1000 // 60 seconds
+        const params = {
             url: 'https://api.twitter.com/1.1/friends/list.json',
             qs: qs,
             oauth: {
-                consumer_key: config.twitter.consumerKey,
-                consumer_secret: config.twitter.consumerSecret,
-                token: config.twitter.accessTokenKey,
-                token_secret: config.twitter.accessTokenSecret
+                consumer_key: Config.twitter.consumerKey,
+                consumer_secret: Config.twitter.consumerSecret,
+                token: Config.twitter.accessTokenKey,
+                token_secret: Config.twitter.accessTokenSecret
             }
         }
         console.log('Requesting following list for: ' + qs.screen_name)
-        request.get(params, function (error, response) {
-            if (error || response === undefined || response.statusCode !== 200) {
+        Request.get(params, (e, response) => {
+            if (e || response === undefined || response.statusCode !== 200) {
                 console.log('Error! Sleeping before retrying...')
-                setTimeout(function () { query(qs, callback) }, sleep)
+                setTimeout(() => query(qs, callback), sleep)
                 return
             }
-            var body = JSON.parse(response.body)
-            var data = parser(qs, body)
-            if (body.next_cursor_str !== '0') {
-                setTimeout(function () {
-                    qs.cursor = body.next_cursor_str
-                    query(qs, function (_, dataNext) {
-                        callback(null, data.concat(dataNext))
-                    })
-                }, sleep)
-            }
+            const body = JSON.parse(response.body)
+            const data = parser(qs, body)
+            if (body.next_cursor_str !== '0') setTimeout(() => {
+                qs.cursor = body.next_cursor_str
+                query(qs, (_, dataNext) => callback(null, data.concat(dataNext)))
+            }, sleep)
             else callback(null, data)
         })
     }
 }
 
-var doTwitterFollowingListing = createTwitterFollowingListing(function (qs, response) {
-    return response.users.map(function (accountFollowed) {
+const doTwitterFollowingListing = createTwitterFollowingListing((qs, response) => {
+    return response.users.map(accountFollowed => {
         return {
             account: qs.screen_name,
             follows: accountFollowed.screen_name.toLowerCase()
@@ -56,16 +52,14 @@ var doTwitterFollowingListing = createTwitterFollowingListing(function (qs, resp
     })
 })
 
-csvParser(fs.createReadStream('accounts.csv'), function (error, csv) {
-    if (error) throw error
-    var accounts = csv.map(function (line) {
-        return line.account.toLowerCase()
-    })
-    highland(accounts)
+CSVParser(FS.createReadStream('accounts.csv'), (e, csv) => {
+    if (e) throw e
+    const accounts = csv.map(line => line.account.toLowerCase())
+    Highland(accounts)
         .map(queryTwitterFriends)
-        .flatMap(highland.wrapCallback(doTwitterFollowingListing))
+        .flatMap(Highland.wrapCallback(doTwitterFollowingListing))
         .flatten()
-        .filter(function (account) { return account !== null && accounts.indexOf(account.follows.toLowerCase()) >= 0 })
-        .pipe(csvWriter())
-        .pipe(fs.createWriteStream('results.csv'))
+        .filter(account => account !== null && accounts.indexOf(account.follows.toLowerCase()) >= 0)
+        .pipe(CSVWriter())
+        .pipe(FS.createWriteStream('results.csv'))
 })
